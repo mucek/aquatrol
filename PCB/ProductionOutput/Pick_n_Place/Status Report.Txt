@@ -1,0 +1,14 @@
+Project Outputs Generation Report
+---------------------------------
+Start Output Generation At 09:53:22 On 07/04/2020
+
+Output: pick and place files
+Type  : Pick Place
+From  : Variant [[No Variations]] of PCB Document [KOntroler v.1.0.PcbDoc]
+   Generated File[Kontroler main board 1.0.csv]
+
+
+Files Generated   : 1
+Documents Printed : 0
+
+Finished Output Generation At 09:53:24 On 07/04/2020
