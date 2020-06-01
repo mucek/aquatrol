@@ -1,12 +1,13 @@
 # Aquatrol
-**Aquariom controller**
+## Aquarium controller with pH probe, 3-channel LED controller and much more!
+![](https://github.com/mucek/aquatrol/blob/master/IMGs/aquatrol.png)
 
 ## User manuals and quick guide
-[User manuals](https://github.com/iksordoo/krn-strela-stm32-as/blob/master/PCB/ProductionOutput/KRN_strela_Report.PDF)
-[User manuals](https://github.com/iksordoo/krn-strela-stm32-as/blob/master/PCB/ProductionOutput/KRN_strela_Report.PDF)
+[User manuals](https://github.com/mucek/aquatrol/blob/master/Docs/_Quickmanual%20aquaTROL.pdf)
+[Connection diagram](https://github.com/mucek/aquatrol/blob/master/Docs/Visio-Aquatrol.pdf)
 
 ## PCB datasheet
-[Gerbers_all_versions](https://github.com/iksordoo/krn-strela-stm32-as/tree/master/PCB/ProductionOutput/Gerbers)
+[PCB datasheet (schematics, PCB ...)](https://github.com/mucek/aquatrol/blob/master/PCB/ProductionOutput/Kontroler%20main%20board%201.0_Report.PDF)
 
 
 ## Folder structure:
