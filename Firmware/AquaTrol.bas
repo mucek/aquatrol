@@ -3,8 +3,8 @@ $crystal = 11059200
 $hwstack = 128
 $swstack = 64
 $framesize = 64
-$version 1 , 0 , 500
-$projecttime = 704
+$version 1 , 0 , 562
+$projecttime = 792
 
 Config Com1 = 115200 , Synchrone = 0 , Parity = None , Stopbits = 1 , Databits = 8 , Clockpol = 0       'BLE
 Config Serialin = Buffered , Size = 50 , Bytematch = 10
@@ -67,8 +67,6 @@ Config Date = Dmy , Separator = Slash
 Config Single = Scientific , Digits = 4
 
 
-
-
 '===============================================================================
 
 'Cas
@@ -113,6 +111,7 @@ Dim History_tmr As Word
 Dim I2c_tmr As Byte
 Const 15_bit = 32767
 Dim S_voltage As Single
+Dim S_voltage1 As Single
 Dim Value As Word
 Dim Byte1 As Byte
 Dim Byte2 As Byte
@@ -144,7 +143,7 @@ Dim Zakasnitev As Word
 Dim Config_bt_skip As Byte
 Dim Skip_sd As Byte
 
-'-------------------------------------------------------------------------------
+
 'Filtra
 Dim Feed_time As Word
    Dim E_feed_time As Eram Word
@@ -160,8 +159,8 @@ Dim Temp_off As Integer
 
 'pH/CO2
 Dim Ph As Single
-Dim Ph_calib_686 As Single
-   Dim E_ph_calib_686 As Eram Single
+Dim Ph_calib_700 As Single
+   Dim E_ph_calib_700 As Eram Single
 Dim Ph_calib_401 As Single
    Dim E_ph_calib_401 As Eram Single
 Dim Ph_calc1 As Single
@@ -175,6 +174,8 @@ Dim Ph_on As Single
 Dim Ph_off As Single
 Dim Ph_hys As Single
 
+Dim Ph_calib As Byte                                        '1, ko pride ukaz na UART
+
 'Skimmer
 Dim Skimmer_on1 As String * 8
    Dim E_skimmer_on1 As Eram String * 8
@@ -187,8 +188,12 @@ Dim Skimmer_off2 As String * 8
 
 
 'LEDs
-Dim Dimming_step As Word                                    'cas koraka v sekundah
-   Dim E_dimming_step As Eram Word
+Dim Dimming_step1 As Word                                   'cas koraka v sekundah
+   Dim E_dimming_step1 As Eram Word
+Dim Dimming_step2 As Word                                   'cas koraka v sekundah
+   Dim E_dimming_step2 As Eram Word
+Dim Dimming_step3 As Word                                   'cas koraka v sekundah
+   Dim E_dimming_step3 As Eram Word
 
 Dim Led1_enabled As Byte
 Dim Dimming_timer1 As Word
@@ -224,6 +229,7 @@ Dim Led3_pwm_off As Byte
    Dim E_led3_pwm_off As Eram Byte
 
 Dim Feed_pump_select As Byte                                '0-funkcija onemogocena, 1-funkcija aktivna na R5, 2-funkcija aktivna na R5+R6
+   Dim E_feed_pump_select As Eram Byte
 
 Ph_hys = 0.1
 Temp_hysteresis = 2                                         '0,2 stopinje C gor/dol od target temp
@@ -246,36 +252,6 @@ Pwm1a = Led1_pwm_off
 Pwm1b = Led2_pwm_off
 Pwm1c = Led3_pwm_off
 
-'(......................................
-'Testiranje - rocne nastavitve
-   Skimmer_on1 = "11:00:00"
-   Skimmer_off1 = "11:15:00"
-   Skimmer_on2 = "18:00:00"
-   Skimmer_off2 = "18:15:00"
-
-   Led1_on_time = "08:55:00"
-   Led1_off_time = "08:56:00"
-   Led1_pwm_on = 255
-   Led1_pwm_off = 0
-
-   Led2_on_time = "08:55:10"
-   Led2_off_time = "08:56:10"
-   Led2_pwm_on = 255
-   Led2_pwm_off = 0
-
-   Led3_on_time = "08:55:10"
-   Led3_off_time = "08:56:10"
-   Led3_pwm_on = 200
-   Led3_pwm_off = 0
-
-
-   Ph_calib_401 = 1.8577
-   Ph_calib_686 = 1.5317
-   Ph_calc1 = 0.1144
-
-   Feed_time = 300
-'......................................
-')
 
 
 Do
@@ -315,6 +291,9 @@ Do
       Gosub Print_bt
    End If
 
+   'Nastavitve preko UARTa
+   If Ph_calib = 1 Then Goto 41_calib_ph
+
    Reset Led_g                                              'UART
 Loop
 
@@ -325,6 +304,7 @@ Loop
 
 51_set_pumps:
    If Disable_pumps = 0 And Rele_pump1 = 1 Then
+
       String2write = "Pumps enabled!"
       Gosub Sd_write_log
 
@@ -367,18 +347,18 @@ Return
 
 
    If Led1_enabled = 1 And Pwm1a < Led1_pwm_on Then         'Sunrise ch 1
-      If Dimming_timer1 < Dimming_step Then
+      If Dimming_timer1 < Dimming_step1 Then
          Incr Dimming_timer1
-      Elseif Dimming_timer1 >= Dimming_step Then
+      Elseif Dimming_timer1 >= Dimming_step1 Then
          Incr Pwm1a
          Dimming_timer1 = 0
       End If
    End If
 
    If Led1_enabled = 0 And Pwm1a > Led1_pwm_off Then        'Sunset ch 1
-      If Dimming_timer1 < Dimming_step Then
+      If Dimming_timer1 < Dimming_step1 Then
          Incr Dimming_timer1
-      Elseif Dimming_timer1 >= Dimming_step Then
+      Elseif Dimming_timer1 >= Dimming_step1 Then
          Decr Pwm1a
          Dimming_timer1 = 0
       End If
@@ -386,18 +366,18 @@ Return
 
 
    If Led2_enabled = 1 And Pwm1b < Led2_pwm_on Then
-      If Dimming_timer2 < Dimming_step Then
+      If Dimming_timer2 < Dimming_step2 Then
          Incr Dimming_timer2
-      Elseif Dimming_timer2 >= Dimming_step Then
+      Elseif Dimming_timer2 >= Dimming_step2 Then
          Incr Pwm1b
          Dimming_timer2 = 0
       End If
    End If
 
    If Led2_enabled = 0 And Pwm1b > Led2_pwm_off Then
-      If Dimming_timer2 < Dimming_step Then
+      If Dimming_timer2 < Dimming_step2 Then
          Incr Dimming_timer2
-      Elseif Dimming_timer2 >= Dimming_step Then
+      Elseif Dimming_timer2 >= Dimming_step2 Then
          Decr Pwm1b
          Dimming_timer2 = 0
       End If
@@ -405,18 +385,18 @@ Return
 
 
    If Led3_enabled = 1 And Pwm1c < Led3_pwm_on Then
-      If Dimming_timer3 < Dimming_step Then
+      If Dimming_timer3 < Dimming_step3 Then
          Incr Dimming_timer3
-      Elseif Dimming_timer3 >= Dimming_step Then
+      Elseif Dimming_timer3 >= Dimming_step3 Then
          Incr Pwm1c
          Dimming_timer3 = 0
       End If
    End If
 
    If Led3_enabled = 0 And Pwm1c > Led3_pwm_off Then
-      If Dimming_timer3 < Dimming_step Then
+      If Dimming_timer3 < Dimming_step3 Then
          Incr Dimming_timer3
-      Elseif Dimming_timer3 >= Dimming_step Then
+      Elseif Dimming_timer3 >= Dimming_step3 Then
          Decr Pwm1c
          Dimming_timer3 = 0
       End If
@@ -555,6 +535,29 @@ Return
    'Get RTC data
    Gosub Get_time
 
+   'Ph kalibracija v EEPROMu
+   Ph_calib_401 = E_ph_calib_401
+      If Ph_calib_401 < -2.0 Or Ph_calib_401 > 2.0 Or Ph_calib_401 = 0 Then
+         Ph_calib_401 = 1.8577
+         E_ph_calib_401 = Ph_calib_401
+      End If
+   Ph_calib_700 = E_ph_calib_700
+      If Ph_calib_700 < -2.0 Or Ph_calib_700 > 2.0 Or Ph_calib_700 = 0 Then
+         Ph_calib_700 = 1.5317
+         E_ph_calib_700 = Ph_calib_700
+      End If
+   Ph_calc1 = E_ph_calc1
+      If Ph_calc1 < -1.0 Or Ph_calc1 > 1.0 Or Ph_calc1 = 0 Then
+         Ph_calc1 = 0.1144
+         E_ph_calc1 = Ph_calc1
+      End If
+
+   Ph_limit = E_ph_limit
+      If Ph_limit > 10 Or Ph_limit < -10 Then
+         Ph_limit = 6.50
+         E_ph_limit = Ph_limit
+      End If
+
    'SD card initialization
    If Skip_sd = 0 Then
       Gosub Sd_config
@@ -562,8 +565,7 @@ Return
    End If
 
 
-   If Skip_sd = 1 Then                                      'Vzamem vrednosti iz EEPROMA, ce ni kartice
-
+   If Skip_sd = 1 Or Sd_detect = 0 Then                     'Vzamem vrednosti iz EEPROMA, ce ni kartice ali je onemogocena
       'Read EEPROM
       Target_temp = E_target_temp
          If Target_temp > 400 Or Target_temp < 100 Then
@@ -577,17 +579,34 @@ Return
       Skimmer_off2 = E_skimmer_off2
 
       Feed_time = E_feed_time
-         If Feed_time > 900 Then                               '15 min
+         If Feed_time > 900 Then                            'default 5 min
             Feed_time = 300
             E_feed_time = Feed_time
          End If
 
-      Dimming_step = E_dimming_step
-         If Dimming_step > 2500 Or Dimming_step < 100 Then
-            Dimming_step = 1000
-            E_dimming_step = Dimming_step
+      Feed_pump_select = E_feed_pump_select
+         If Feed_pump_select > 2 Then                       'default disabled
+            Feed_pump_select = 0
+            E_feed_pump_select = Feed_pump_select
          End If
 
+      Dimming_step1 = E_dimming_step1
+         If Dimming_step1 > 2500 Or Dimming_step1 < 100 Then
+            Dimming_step1 = 1000
+            E_dimming_step1 = Dimming_step1
+         End If
+
+      Dimming_step2 = E_dimming_step2
+         If Dimming_step2 > 2500 Or Dimming_step2 < 100 Then
+            Dimming_step2 = 1000
+            E_dimming_step2 = Dimming_step2
+         End If
+
+      Dimming_step3 = E_dimming_step3
+         If Dimming_step3 > 2500 Or Dimming_step3 < 100 Then
+            Dimming_step3 = 1000
+            E_dimming_step3 = Dimming_step3
+         End If
 
       Led1_on_time = E_led1_on_time
       Led1_off_time = E_led1_off_time
@@ -616,33 +635,12 @@ Return
             E_led3_pwm_off = Led3_pwm_off
          End If
 
-      Ph_calib_401 = E_ph_calib_401
-         If Ph_calib_401 < -2.0 Or Ph_calib_401 > 2.0 Or Ph_calib_401 = 0 Then
-            Ph_calib_401 = 1.8577
-            E_ph_calib_401 = Ph_calib_401
-         End If
-      Ph_calib_686 = E_ph_calib_686
-         If Ph_calib_686 < -2.0 Or Ph_calib_686 > 2.0 Or Ph_calib_686 = 0 Then
-            Ph_calib_686 = 1.5317
-            E_ph_calib_686 = Ph_calib_686
-         End If
-      Ph_calc1 = E_ph_calc1
-         If Ph_calc1 < -1.0 Or Ph_calc1 > 1.0 Or Ph_calc1 = 0 Then
-            Ph_calc1 = 0.1144
-            E_ph_calc1 = Ph_calc1
-         End If
-
-
-   '   Ph_calibrated = E_ph_calibrated
-   '      If Ph_calibrated > 1 Then
-   '         Goto 41_calib_ph
-   '      End If
-
       Ph_limit = E_ph_limit
-         If Ph_limit > 10 Or Ph_limit < -10 Then
-            Ph_limit = 6.50
+         If Ph_limit < 3 Or Ph_limit > 10 Then
+            Ph_limit = 6.5
             E_ph_limit = Ph_limit
          End If
+
    End If
 Return
 
@@ -678,7 +676,7 @@ Print_terminal:
 '   Print #2 , "Adc3:" ; Adc_3
 '   Print #2 , "Adc4:" ; Adc_4
    Print #2 , "IN1 feed:" ; In1 ; "(" ; Feed_time ; "s)"
-   Print #2 , "IN2 light:" ; In2 ; "(step " ; Dimming_step ; ")"
+   Print #2 , "IN2 light:" ; In2 ; "(step " ; Dimming_step1 ; ")"
 Return
 
 
@@ -699,13 +697,15 @@ Print_bt:
    Print "Temp :" ; Temperatura ; "oC"
    Print "AC OK:" ; Ac_ok ; : If Ac_ok = 0 Then Print "!!!" : If Ac_ok = 1 Then Print ""
    Print "IN1 feed:" ; In1 ; "(" ; Feed_time ; "s)"
-   Print "IN2 light:" ; In2 ; "(step " ; Dimming_step ; ")"
+   Print "IN2 light:" ; In2 ; "(step " ; Dimming_step1 ; ")"
 Return
 
 
 41_read_i2c_adc:
-   If I2c_tmr > 5 Then
+   If I2c_tmr > 10 Then
       C = 0
+      S_voltage = 0
+
       Do
          I2c_tmr = 0
          Disable Interrupts
@@ -715,7 +715,7 @@ Return
          I2cstop
          For I = 1 To 250
             I2cstart
-            I2cwbyte &B1001_0001                               'Popravi adreso glede na ID senzorja!
+            I2cwbyte &B1001_0001                            'Popravi adreso glede na ID senzorja!
             I2crbyte Byte1 , Ack
             I2crbyte Byte2 , Ack
             I2crbyte Byte3 , Ack
@@ -726,7 +726,7 @@ Return
             Waitms 1
           Next
          I2cstart
-         I2cwbyte &B1001_0001                                  'Popravi adreso glede na ID senzorja!
+         I2cwbyte &B1001_0001                               'Popravi adreso glede na ID senzorja!
          I2crbyte Byte1 , Ack
          I2crbyte Byte2 , Ack
          I2crbyte Byte3 , Ack
@@ -735,12 +735,14 @@ Return
 
 
          Value = Makeint(byte2 , Byte1)
-         S_voltage = Value / 15_bit
-         S_voltage = S_voltage * 2.048                            'Napetost v V
-         Incr C
-      Loop Until C = 10
+         S_voltage1 = Value / 15_bit
+         S_voltage1 = S_voltage1 * 2.048                    'Napetost v V
 
-      S_voltage = S_voltage / 10
+         S_voltage = S_voltage + S_voltage1
+         Incr C
+      Loop Until C = 5
+
+      S_voltage = S_voltage / 5
 
    End If
 
@@ -751,28 +753,28 @@ Return
 41_calib_ph:
    Set Led_r : Set Led_b : Reset Led_g
 
-   Print #2 , "Insert probe to buffer pH=6,86 in 10s and wait"
+   Print #2 , "Insert probe to buffer pH=7,00 in 10s and wait"
       A_ph = 60
       Do
          Print #2 , Chr(028) : Waitms 100
-         Print #2 , "Calibrating to pH 6,86, time remaining " ; A_ph ; "s ..."
+         Print #2 , "Calibrating to pH 7,00, time remaining " ; A_ph ; "s ..."
          Decr A_ph
          Wait 1
       Loop Until A_ph = 0
 
-      Ph_calib_686 = 0
+      Ph_calib_700 = 0
       A_ph = 0
       I2c_tmr = 20
       Do
          Gosub 41_read_i2c_adc
          Waitms 10
-         Ph_calib_686 = Ph_calib_686 + S_voltage
+         Ph_calib_700 = Ph_calib_700 + S_voltage
          Incr A_ph
       Loop Until A_ph = 10
 
-      Ph_calib_686 = Ph_calib_686 / 10
-      E_ph_calib_686 = Ph_calib_686
-      Print #2 , "pH 6,86 voltage: " ; Ph_calib_686 ; "V"
+      Ph_calib_700 = Ph_calib_700 / 10
+      E_ph_calib_700 = Ph_calib_700
+      Print #2 , "pH 7,00 voltage: " ; Ph_calib_700 ; "V"
       Wait 5
 
 
@@ -807,8 +809,8 @@ Return
       Ph_calib_401 = Ph_calib_401 / 10
       E_ph_calib_401 = Ph_calib_401
 
-      Ph_calc1 = Ph_calib_401 - Ph_calib_686
-      Ph_calc1 = Ph_calc1 / 2.85                            '1 pH
+      Ph_calc1 = Ph_calib_401 - Ph_calib_700
+      Ph_calc1 = Ph_calc1 / 3                               '1 pH
 
       Print #2 , "pH 4,01 voltage: " ; Ph_calib_401 ; "V"
       Print #2 , "1 pH step voltage: " ; Ph_calc1 ; "V"
@@ -823,15 +825,16 @@ Return
 
       Wait 5
 
+      Ph_calib = 0
    Reset Led_r : Reset Led_b : Reset Led_g
 Goto 02_main
 
 
 41_ph_calc:
-   Ph = S_voltage - Ph_calib_686
+   Ph = S_voltage - Ph_calib_700
    Ph = Ph / Ph_calc1
    Ph = -ph
-   Ph = Ph + 6.86
+   Ph = Ph + 7.00
 Return
 
 
@@ -846,7 +849,9 @@ Return
    If Button1 = 0 Then In1 = 1 : If Button1 = 1 Then In1 = 0       'Feed
       If In1 = 1 Then
          Disable_pumps = Feed_time
-         Waitms 250
+         Set Led_r : Set Led_b
+         Wait 2
+         Reset Led_r : Reset Led_b
       End If
    If Button2 = 0 Then In2 = 1 : If Button2 = 1 Then In2 = 0       'Light
       If In2 = 1 Then
@@ -856,18 +861,22 @@ Return
                Led2_enabled = 1 : If Pwm1b < Led2_pwm_on Then Incr Pwm1b
                Led3_enabled = 1 : If Pwm1c < Led3_pwm_on Then Incr Pwm1c
                Waitms 50
+               Toggle Led_g
             Loop Until Pwm1a = Led1_pwm_on
                Pwm1a = Led1_pwm_on
                Pwm1b = Led2_pwm_on
                Pwm1c = Led3_pwm_on
+               Reset Led_g
 
-         Elseif Led1_enabled = 1 Then
+         Elseif Led1_enabled = 1 Then                       'Izklop
             Do
                Led1_enabled = 0 : If Pwm1a > Led1_pwm_off Then Decr Pwm1a
                Led2_enabled = 0 : If Pwm1b > Led2_pwm_off Then Decr Pwm1b
                Led3_enabled = 0 : If Pwm1c > Led3_pwm_off Then Decr Pwm1c
+               Toggle Led_g : Toggle Led_r
                Waitms 50
             Loop Until Pwm1a = Led1_pwm_off
+               Reset Led_g : Reset Led_r
                Pwm1a = Led1_pwm_off
                Pwm1b = Led2_pwm_off
                Pwm1c = Led3_pwm_off
@@ -1150,17 +1159,19 @@ Sd_start:
         Print #file_handle , "000 - power off (000-255)"
         Print #file_handle , "11:00:00 - on time"
         Print #file_handle , "19:00:00 - off time"
-        Print #file_handle , "1000 - Dimming Step(0100-9999, global)"
+        Print #file_handle , "1000 - Dimming Step 1(0100-9999)"
         Print #file_handle , "_________LED 2:__________"
         Print #file_handle , "255 - power on (000-255)"
         Print #file_handle , "000 - power off (000-255)"
         Print #file_handle , "11:15:00 - on time"
         Print #file_handle , "18:50:00 - off time"
+        Print #file_handle , "1100 - Dimming Step 1(0100-9999)"
         Print #file_handle , "_________LED 3:__________"
         Print #file_handle , "255 - power on (000-255)"
         Print #file_handle , "000 - power off (000-255)"
         Print #file_handle , "09:00:00 - on time"
         Print #file_handle , "20:00:00 - off time"
+        Print #file_handle , "1200 - Dimming Step 1(0100-9999)"
         Print #file_handle , ""
         Print #file_handle , "_______TEMPERATURE_______"
         Print #file_handle , "250 - target temperature (xxx=xx.x)"
@@ -1180,7 +1191,7 @@ Sd_start:
         Print #file_handle , ""
         Print #file_handle , "_____CO2 calibration______"
         Print #file_handle , "1.8577 - ph_calib_401"
-        Print #file_handle , "1.5317 - ph_calib_686"
+        Print #file_handle , "1.5317 - ph_calib_700"
         Print #file_handle , "0.1144 - ph_calc1"
 '        Print #file_handle , ""
 '        Print #file_handle , "________FEED TIME________"
@@ -1202,48 +1213,69 @@ Sd_start:
              Line Input #file_handle , Input_string         'LED1 power day
                Input_string = Left(input_string , 3)
                Led1_pwm_on = Val(input_string)
+               E_led1_pwm_on = Led1_pwm_on
              Line Input #file_handle , Input_string         'power night
                Input_string = Left(input_string , 3)
                Led1_pwm_off = Val(input_string)
+               E_led1_pwm_off = Led1_pwm_off
             Line Input #file_handle , Input_string          'time to turn on
                Input_string = Left(input_string , 8)
                Led1_on_time = Input_string
+               E_led1_on_time = Led1_on_time
             Line Input #file_handle , Input_string          'time to turn on
                Input_string = Left(input_string , 8)
                Led1_off_time = Input_string
+               E_led1_off_time = Led1_off_time
             Line Input #file_handle , Input_string          'tspeed of sunset/sunrise
                Input_string = Left(input_string , 4)
-               Dimming_step = Val(input_string)
+               Dimming_step1 = Val(input_string)
+               E_dimming_step1 = Dimming_step1
 
             'LED2
             Line Input #file_handle , Input_string : Input_string = ""
             Line Input #file_handle , Input_string          'LED2 power day
                Input_string = Left(input_string , 3)
                Led2_pwm_on = Val(input_string)
+               E_led2_pwm_on = Led2_pwm_on
             Line Input #file_handle , Input_string          'power night
                Input_string = Left(input_string , 3)
                Led2_pwm_off = Val(input_string)
+               E_led2_pwm_off = Led2_pwm_off
             Line Input #file_handle , Input_string          'time to turn on
                Input_string = Left(input_string , 8)
                Led2_on_time = Input_string
+               E_led2_pwm_on = Led2_pwm_on
             Line Input #file_handle , Input_string          'time to turn on
                Input_string = Left(input_string , 8)
                Led2_off_time = Input_string
+               E_led2_off_time = Led2_off_time
+            Line Input #file_handle , Input_string          'tspeed of sunset/sunrise
+               Input_string = Left(input_string , 4)
+               Dimming_step2 = Val(input_string)
+               E_dimming_step2 = Dimming_step2
 
             'LED3
             Line Input #file_handle , Input_string : Input_string = ""
             Line Input #file_handle , Input_string          'LED3 power day
                Input_string = Left(input_string , 3)
                Led3_pwm_on = Val(input_string)
+               E_led3_pwm_on = Led3_pwm_on
             Line Input #file_handle , Input_string          'power night
                Input_string = Left(input_string , 3)
                Led3_pwm_off = Val(input_string)
+               E_led3_pwm_off = Led3_pwm_off
             Line Input #file_handle , Input_string          'time to turn on
                Input_string = Left(input_string , 8)
                Led3_on_time = Input_string
+               E_led3_on_time = Led3_on_time
             Line Input #file_handle , Input_string          'time to turn on
                Input_string = Left(input_string , 8)
                Led3_off_time = Input_string
+               E_led3_off_time = Led3_off_time
+            Line Input #file_handle , Input_string          'tspeed of sunset/sunrise
+               Input_string = Left(input_string , 4)
+               Dimming_step3 = Val(input_string)
+               E_dimming_step3 = Dimming_step3
 
             'TEMPERATURE
             Line Input #file_handle , Input_string
@@ -1251,6 +1283,7 @@ Sd_start:
             Line Input #file_handle , Input_string
                Input_string = Left(input_string , 3)
                Target_temp = Val(input_string)
+               E_target_temp = Target_temp
 
             'SKIMMER
             Line Input #file_handle , Input_string
@@ -1258,15 +1291,19 @@ Sd_start:
             Line Input #file_handle , Input_string
                Input_string = Left(input_string , 8)
                Skimmer_on1 = Input_string
+               E_skimmer_on1 = Skimmer_on1
             Line Input #file_handle , Input_string
                Input_string = Left(input_string , 8)
                Skimmer_off1 = Input_string
+               E_skimmer_off1 = Skimmer_off1
             Line Input #file_handle , Input_string
                Input_string = Left(input_string , 8)
                Skimmer_on2 = Input_string
+               E_skimmer_on2 = Skimmer_on2
             Line Input #file_handle , Input_string
                Input_string = Left(input_string , 8)
                Skimmer_off2 = Input_string
+               E_skimmer_off2 = Skimmer_off2
 
             'CO2 VALVE
             Line Input #file_handle , Input_string
@@ -1274,6 +1311,7 @@ Sd_start:
             Line Input #file_handle , Input_string
                Input_string = Left(input_string , 4)
                Ph_limit = Val(input_string)
+               E_ph_limit = Ph_limit
 
             'FEED DELAY
             Line Input #file_handle , Input_string
@@ -1281,57 +1319,11 @@ Sd_start:
             Line Input #file_handle , Input_string
                Input_string = Left(input_string , 3)
                Feed_time = Val(input_string)
+               E_feed_time = Feed_time
             Line Input #file_handle , Input_string
                Input_string = Left(input_string , 1)
                Feed_pump_select = Val(input_string)
-
-            'pH CALIBRATION
-            Line Input #file_handle , Input_string
-            Line Input #file_handle , Input_string : Input_string = ""
-            Line Input #file_handle , Input_string
-               Input_string = Left(input_string , 6)
-               Ph_calib_401 = Val(input_string)
-            Line Input #file_handle , Input_string
-               Input_string = Left(input_string , 6)
-               Ph_calib_686 = Val(input_string)
-            Line Input #file_handle , Input_string
-               Input_string = Left(input_string , 6)
-               Ph_calc1 = Val(input_string)
-
-
-
-
-            Print #2 , "Data from SD:"
-            Print #2 , "L1 day:" ; Led1_pwm_on
-            Print #2 , "L1 night:" ; Led1_pwm_off
-            Print #2 , "L1 on:" ; Led1_on_time
-            Print #2 , "L1 off:" ; Led1_off_time
-            Print #2 , "Dimming step:" ; Dimming_step
-            Print #2 , ""
-            Print #2 , "L2 day:" ; Led2_pwm_on
-            Print #2 , "L2 night:" ; Led2_pwm_off
-            Print #2 , "L2 on:" ; Led2_on_time
-            Print #2 , "L2 off:" ; Led2_off_time
-            Print #2 , ""
-            Print #2 , "L3 day:" ; Led3_pwm_on
-            Print #2 , "L3 night:" ; Led3_pwm_off
-            Print #2 , "L3 on:" ; Led3_on_time
-            Print #2 , "L3 off:" ; Led3_off_time
-            Print #2 , ""
-            Print #2 , "Temp_set:" ; Target_temp
-            Print #2 , ""
-            Print #2 , "Skimmer1:" ; Skimmer_on1 ; "/" ; Skimmer_off1
-            Print #2 , "Skimmer2:" ; Skimmer_on2 ; "/" ; Skimmer_off2
-            Print #2 , ""
-            Print #2 , "CO2:" ; Ph_limit
-            Print #2 , ""
-            Print #2 , "Feed:" ; Feed_time ; "," ; Feed_pump_select
-            Print #2 ,
-            Print #2 , "pH calib 4.01:" ; Ph_calib_401
-            Print #2 , "pH calib 6.86:" ; Ph_calib_686
-            Print #2 , "pH calib:" ; Ph_calc1
-
-            Wait 10
+               E_feed_pump_select = Feed_pump_select
 
         Flush #file_handle
         Close #file_handle
@@ -1345,6 +1337,40 @@ Sd_start:
    Elseif Sd_detect = 1 Then
       Print #2 , "SD error!"
    End If
+
+   Print #2 , "Data from SD:"
+   Print #2 , "L1 day:" ; Led1_pwm_on
+   Print #2 , "L1 night:" ; Led1_pwm_off
+   Print #2 , "L1 on:" ; Led1_on_time
+   Print #2 , "L1 off:" ; Led1_off_time
+   Print #2 , "Dimming step1:" ; Dimming_step1
+   Print #2 , ""
+   Print #2 , "L2 day:" ; Led2_pwm_on
+   Print #2 , "L2 night:" ; Led2_pwm_off
+   Print #2 , "L2 on:" ; Led2_on_time
+   Print #2 , "L2 off:" ; Led2_off_time
+   Print #2 , "Dimming step2:" ; Dimming_step2
+   Print #2 , ""
+   Print #2 , "L3 day:" ; Led3_pwm_on
+   Print #2 , "L3 night:" ; Led3_pwm_off
+   Print #2 , "L3 on:" ; Led3_on_time
+   Print #2 , "L3 off:" ; Led3_off_time
+   Print #2 , "Dimming step3:" ; Dimming_step3
+   Print #2 , ""
+   Print #2 , "Temp_set:" ; Target_temp
+   Print #2 , ""
+   Print #2 , "Skimmer1:" ; Skimmer_on1 ; "/" ; Skimmer_off1
+   Print #2 , "Skimmer2:" ; Skimmer_on2 ; "/" ; Skimmer_off2
+   Print #2 , ""
+   Print #2 , "CO2:" ; Ph_limit
+   Print #2 , ""
+   Print #2 , "Feed:" ; Feed_time ; "," ; Feed_pump_select
+   Print #2 ,
+   Print #2 , "pH calib 4.01:" ; Ph_calib_401
+   Print #2 , "pH calib 7.00:" ; Ph_calib_700
+   Print #2 , "pH calib:" ; Ph_calc1
+
+   Wait 5
 
    Enable Interrupts
 Return
@@ -1408,9 +1434,9 @@ Return
 Serial0charmatch:
    Pushall
 
-' If _rs232inbuf0(_rs_bufcountr0 -1) = 13 Then
-      Toggle Led_r
-'   End If
+   If _rs232inbuf0(_rs_bufcountr0 -1) = 13 Then
+      Set Led_g
+   End If
 
    Popall
    Clear Serialin
@@ -1423,6 +1449,9 @@ Serial1charmatch:
 
    If _rs232inbuf1(_rs_bufcountr1 -1) = 13 Then
       Set Led_g
+
+      If _rs232inbuf1(_rs_bufcountr1 -2) = 100 Then Ph_calib = 1
+
    End If
 
    Clear Serialin1
