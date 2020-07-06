@@ -3,8 +3,8 @@ $crystal = 11059200
 $hwstack = 128
 $swstack = 64
 $framesize = 64
-$version 1 , 0 , 562
-$projecttime = 792
+$version 1 , 0 , 575
+$projecttime = 803
 
 Config Com1 = 115200 , Synchrone = 0 , Parity = None , Stopbits = 1 , Databits = 8 , Clockpol = 0       'BLE
 Config Serialin = Buffered , Size = 50 , Bytematch = 10
@@ -500,7 +500,7 @@ Return
    Print #2 , "AquaTrol startup, v." ; Version(2)
 
    'Bluetooth setup
-   Bt_initialized = E_bt_initialized
+'   Bt_initialized = E_bt_initialized
    If Bt_initialized <> 1 And Config_bt_skip = 0 Then
       'Konfigutacija BLE modula
       Disable Interrupts
@@ -753,11 +753,10 @@ Return
 41_calib_ph:
    Set Led_r : Set Led_b : Reset Led_g
 
-   Print #2 , "Insert probe to buffer pH=7,00 in 10s and wait"
+   Print "Insert probe to buffer pH=7,00 in 10s and wait"
       A_ph = 60
       Do
-         Print #2 , Chr(028) : Waitms 100
-         Print #2 , "Calibrating to pH 7,00, time remaining " ; A_ph ; "s ..."
+         Print "Calibrating to pH 7,00, time remaining " ; A_ph ; "s ..."
          Decr A_ph
          Wait 1
       Loop Until A_ph = 0
@@ -774,24 +773,24 @@ Return
 
       Ph_calib_700 = Ph_calib_700 / 10
       E_ph_calib_700 = Ph_calib_700
-      Print #2 , "pH 7,00 voltage: " ; Ph_calib_700 ; "V"
+      Print "pH 7,00 voltage: " ; Ph_calib_700 ; "V"
       Wait 5
 
 
-   Print #2 , "Put probe into destiled water"
+   Print "Put probe into destiled water"
       A_ph = 20
       Do
-         Print #2 , Chr(028) : Waitms 100
-         Print #2 , "Clear probe, time remaining " ; A_ph ; "s ..."
+         Print Chr(028) : Waitms 100
+         Print "Clear probe, time remaining " ; A_ph ; "s ..."
          Decr A_ph
          Wait 1
       Loop Until A_ph = 0
 
-   Print #2 , "Insert probe to buffer pH=4,01 in 10s and wait"
+   Print "Insert probe to buffer pH=4,01 in 10s and wait"
       A_ph = 60
       Do
-         Print #2 , Chr(028) : Waitms 100
-         Print #2 , "Calibrating to pH 4,01, time remaining " ; A_ph ; "s ..."
+         Print Chr(028) : Waitms 100
+         Print "Calibrating to pH 4,01, time remaining " ; A_ph ; "s ..."
          Decr A_ph
          Wait 1
       Loop Until A_ph = 0
@@ -812,16 +811,16 @@ Return
       Ph_calc1 = Ph_calib_401 - Ph_calib_700
       Ph_calc1 = Ph_calc1 / 3                               '1 pH
 
-      Print #2 , "pH 4,01 voltage: " ; Ph_calib_401 ; "V"
-      Print #2 , "1 pH step voltage: " ; Ph_calc1 ; "V"
+      Print "pH 4,01 voltage: " ; Ph_calib_401 ; "V"
+      Print "1 pH step voltage: " ; Ph_calc1 ; "V"
 
       Ph_calibrated = 1
       E_ph_calibrated = Ph_calibrated
 
       Wait 5
 
-      Print #2 , Chr(028) : Waitms 100
-      Print #2 , "Clear probe before putting into aquarium!"
+      Print Chr(028) : Waitms 100
+      Print "Clear probe before putting into aquarium!"
 
       Wait 5
 
@@ -1436,6 +1435,9 @@ Serial0charmatch:
 
    If _rs232inbuf0(_rs_bufcountr0 -1) = 13 Then
       Set Led_g
+
+      If _rs232inbuf0(_rs_bufcountr0 -2) = 99 Then Ph_calib = 1       'c
+
    End If
 
    Popall
@@ -1450,7 +1452,7 @@ Serial1charmatch:
    If _rs232inbuf1(_rs_bufcountr1 -1) = 13 Then
       Set Led_g
 
-      If _rs232inbuf1(_rs_bufcountr1 -2) = 100 Then Ph_calib = 1
+      If _rs232inbuf1(_rs_bufcountr1 -2) = 99 Then Ph_calib = 1       'c
 
    End If
 

@@ -1,0 +1,41 @@
+
+AquaTrol startup, v.1.0.549, 10/06/20, 20:26:10
+
+AquaTrol startup, v.1.0.549, 10/06/20, 14:44:42
+
+AquaTrol startup, v.1.0.550, 10/06/20, 40:20:26
+10/06/20,14:46:50,Pump 1 disabled
+10/06/20,14:52:13,Pumps enabled!
+
+AquaTrol startup, v.1.0.553, 10/06/20, 14:52:29
+10/06/20,14:52:43,CO2 enabled!
+
+AquaTrol startup, v.1.0.553, 10/06/20, 15:01:27
+10/06/20,15:01:42,CO2 enabled!
+
+AquaTrol startup, v.1.0.554, 10/06/20, 15:02:09
+
+AquaTrol startup, v.1.0.555, 10/06/20, 15:02:20
+10/06/20,15:02:34,CO2 enabled!
+
+AquaTrol startup, v.1.0.555, 06/07/20, 09:40:15
+06/07/20,09:40:29,CO2 enabled!
+06/07/20,09:42:45,CO2 enabled!
+06/07/20,09:42:57,CO2 disabled!
+06/07/20,09:43:31,CO2 enabled!
+06/07/20,09:44:28,CO2 disabled!
+06/07/20,09:44:51,CO2 enabled!
+06/07/20,09:46:11,CO2 disabled!
+06/07/20,09:46:22,CO2 enabled!
+06/07/20,09:46:45,CO2 enabled!
+06/07/20,09:48:39,CO2 enabled!
+06/07/20,09:50:33,CO2 disabled!
+
+AquaTrol startup, v.1.0.555, 06/07/20, 09:52:24
+
+AquaTrol startup, v.1.0.555, 06/07/20, 09:52:53
+
+AquaTrol startup, v.1.0.555, 06/07/20, 09:53:04
+
+AquaTrol startup, v.1.0.555, 06/07/20, 09:53:08
+06/07/20,09:53:22,CO2 enabled!

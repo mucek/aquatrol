@@ -1,0 +1,42 @@
+AquaTROL BASIC SETTINGS
+/Edit only values, keep formatting!!!/
+
+_________LED 1:__________
+255 - power on (000-255)
+000 - power off (000-255)
+11:00:00 - on time
+19:00:00 - off time
+1000 - Dimming Step 1(0100-9999)
+_________LED 2:__________
+255 - power on (000-255)
+000 - power off (000-255)
+11:15:00 - on time
+18:50:00 - off time
+1100 - Dimming Step 1(0100-9999)
+_________LED 3:__________
+255 - power on (000-255)
+000 - power off (000-255)
+09:00:00 - on time
+20:00:00 - off time
+1200 - Dimming Step 1(0100-9999)
+
+_______TEMPERATURE_______
+250 - target temperature (xxx=xx.x)
+
+_________SKIMMER_________
+10:00:00 - on time 1
+10:15:00 - off time 1
+16:00:00 - on time 2
+16:15:00 - off time 2
+
+_________CO2 VALVE_______
+6.50 - target pH (x.xx)
+
+________FEED TIME________
+300 - feed time in s (xxx)
+1 - pumps affected (0,1,2)
+
+_____CO2 calibration______
+1.8577 - ph_calib_401
+1.5317 - ph_calib_686
+0.1144 - ph_calc1
