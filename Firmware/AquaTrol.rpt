@@ -1,6 +1,6 @@
 Report       : AquaTrol
-Date         : 07-06-2020
-Time         : 10:28:52
+Date         : 07-16-2020
+Time         : 14:20:16
 
 Compiler     : BASCOM-AVR LIBRARY V 2.0.7.9
 Processor    : M64
@@ -8,8 +8,8 @@ SRAM         : 1000 hex
 EEPROM       : 800 hex
 ROMSIZE      : 10000 hex
 
-ROMIMAGE     : 6FF2 hex  -> Will fit into ROM
-ROMIMAGE     :  28658 dec
+ROMIMAGE     : 7002 hex  -> Will fit into ROM
+ROMIMAGE     :  28674 dec
 FLASH USED   :  43  %
 BAUD         : 9600 Baud
 XTAL         : 11059200 Hz
@@ -989,7 +989,7 @@ _FRAME_HIGH                      &H1041
 _XMEGA                           0
 _VERSION_MAJOR                   1
 _VERSION_MINOR                   0
-_VERSION_BUILD                   575
+_VERSION_BUILD                   582
 _RS232_BUFSIZE0                  50
 _RS232_BUFSIZE_IN0P1             51
 _CHECKCHAR0                      1

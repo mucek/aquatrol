@@ -3,8 +3,8 @@ $crystal = 11059200
 $hwstack = 128
 $swstack = 64
 $framesize = 64
-$version 1 , 0 , 575
-$projecttime = 803
+$version 1 , 0 , 582
+$projecttime = 811
 
 Config Com1 = 115200 , Synchrone = 0 , Parity = None , Stopbits = 1 , Databits = 8 , Clockpol = 0       'BLE
 Config Serialin = Buffered , Size = 50 , Bytematch = 10
@@ -244,7 +244,7 @@ Enable Interrupts
 Gosub 01_init
 
 02_main:
-Temperatura = 300                                           'Da ne vklopi gretja, preden prvic prebere senzor
+Temperatura = 850                                           'Da ne vklopi gretja, preden prvic prebere senzor
 I2c_tmr = 19                                                'Da prvic hitro prebere
 1w_tmr = 50
 
@@ -500,7 +500,7 @@ Return
    Print #2 , "AquaTrol startup, v." ; Version(2)
 
    'Bluetooth setup
-'   Bt_initialized = E_bt_initialized
+   Bt_initialized = E_bt_initialized
    If Bt_initialized <> 1 And Config_bt_skip = 0 Then
       'Konfigutacija BLE modula
       Disable Interrupts
@@ -1221,7 +1221,7 @@ Sd_start:
                Input_string = Left(input_string , 8)
                Led1_on_time = Input_string
                E_led1_on_time = Led1_on_time
-            Line Input #file_handle , Input_string          'time to turn on
+            Line Input #file_handle , Input_string          'time to turn off
                Input_string = Left(input_string , 8)
                Led1_off_time = Input_string
                E_led1_off_time = Led1_off_time
@@ -1243,8 +1243,8 @@ Sd_start:
             Line Input #file_handle , Input_string          'time to turn on
                Input_string = Left(input_string , 8)
                Led2_on_time = Input_string
-               E_led2_pwm_on = Led2_pwm_on
-            Line Input #file_handle , Input_string          'time to turn on
+               E_led2_on_time = Led2_on_time
+            Line Input #file_handle , Input_string          'time to turn off
                Input_string = Left(input_string , 8)
                Led2_off_time = Input_string
                E_led2_off_time = Led2_off_time
@@ -1267,7 +1267,7 @@ Sd_start:
                Input_string = Left(input_string , 8)
                Led3_on_time = Input_string
                E_led3_on_time = Led3_on_time
-            Line Input #file_handle , Input_string          'time to turn on
+            Line Input #file_handle , Input_string          'time to turn off
                Input_string = Left(input_string , 8)
                Led3_off_time = Input_string
                E_led3_off_time = Led3_off_time
@@ -1368,6 +1368,8 @@ Sd_start:
    Print #2 , "pH calib 4.01:" ; Ph_calib_401
    Print #2 , "pH calib 7.00:" ; Ph_calib_700
    Print #2 , "pH calib:" ; Ph_calc1
+
+   Gosub Print_bt
 
    Wait 5
 
