@@ -3,8 +3,8 @@ $crystal = 11059200
 $hwstack = 128
 $swstack = 64
 $framesize = 64
-$version 1 , 0 , 582
-$projecttime = 811
+$version 1 , 0 , 598
+$projecttime = 826
 
 Config Com1 = 115200 , Synchrone = 0 , Parity = None , Stopbits = 1 , Databits = 8 , Clockpol = 0       'BLE
 Config Serialin = Buffered , Size = 50 , Bytematch = 10
@@ -37,7 +37,7 @@ Config Pina.1 = Input : Button2 Alias Pina.1 : Set Porta.1
 Config Pina.2 = Input : Button1 Alias Pina.2 : Set Porta.2
 
 Config Pind.4 = Input : Mfp Alias Pind.4
-Config Pine.7 = Input : Sd_detect Alias Pine.7 : Porte.7 = 1
+Config Pine.7 = Input : Sd_missing Alias Pine.7 : Porte.7 = 1
 Config Pinc.7 = Input : Main_detect Alias Pinc.7
 
 'Nov
@@ -130,6 +130,7 @@ Dim adc_4 as word
 Dim In1 As Byte
 Dim In2 As Byte
 Dim Ac_ok As Byte
+Dim Ac_fail_cntr As Byte
 
 '1wire
 Dim 1w_conv As Bit
@@ -559,13 +560,13 @@ Return
       End If
 
    'SD card initialization
-   If Skip_sd = 0 Then
+   If Skip_sd = 0 And Sd_missing = 0 Then
       Gosub Sd_config
       Gosub Sd_start
    End If
 
-
-   If Skip_sd = 1 Or Sd_detect = 0 Then                     'Vzamem vrednosti iz EEPROMA, ce ni kartice ali je onemogocena
+   'Vzamem vrednosti iz EEPROMA, ce ni kartice ali je onemogocena
+   If Skip_sd = 1 Or Sd_missing = 1 Then
       'Read EEPROM
       Target_temp = E_target_temp
          If Target_temp > 400 Or Target_temp < 100 Then
@@ -656,7 +657,6 @@ Return
 Print_terminal:
    Print #2 , Chr(028) : Waitms 100
    Print #2 , Date$ ; " " ; Time$
-   Print #2 , ""
    Print #2 , "Fltr1_dis:" ; Rele_pump1 ; "(t=" ; Disable_pumps ; ")"
    Print #2 , "Fltr2_dis:" ; Rele_pump2 ; "(t=" ; Disable_pumps ; ")"
    Print #2 , "Heater:" ; Rele_heater ; "(" ; Temp_on ; "/" ; Temp_off ; ")"
@@ -669,14 +669,14 @@ Print_terminal:
    Print #2 , ""
    Print #2 , "pH :" ; Ph ; "(U=" ; S_voltage ; "V)"
    Print #2 , "Temp :" ; Temperatura ; "oC"
-   Print #2 , "AC OK:" ; Ac_ok ; : If Ac_ok = 0 Then Print#2 , "!!!" : If Ac_ok = 1 Then Print#2 , ""
+   Print #2 , "AC OK:" ; Ac_ok ; : If Ac_ok = 0 Then Print #2 , "!!!" : If Ac_ok = 1 Then Print ""
+   Print #2 , "IN1 feed:" ; In1 ; "(" ; Feed_time ; "s)"
+   Print #2 , "IN2 light:" ; In2 ; "(step " ; Dimming_step1 ; ")"
 '   Print #2 , "Adc0:" ; Adc_0
 '   Print #2 , "Adc1:" ; Adc_1
 '   Print #2 , "Adc2:" ; Adc_2
 '   Print #2 , "Adc3:" ; Adc_3
 '   Print #2 , "Adc4:" ; Adc_4
-   Print #2 , "IN1 feed:" ; In1 ; "(" ; Feed_time ; "s)"
-   Print #2 , "IN2 light:" ; In2 ; "(step " ; Dimming_step1 ; ")"
 Return
 
 
@@ -883,7 +883,17 @@ Return
          Waitms 250
       End If
 
-   If Main_detect = 1 Then Ac_ok = 0 : If Main_detect = 0 Then Ac_ok = 1
+   If Main_detect = 1 Then
+      If Ac_fail_cntr < 250 Then Incr Ac_fail_cntr
+   Elseif Main_detect = 0 Then
+      Ac_fail_cntr = 0
+   End If
+
+   If Ac_fail_cntr > 10 Then
+      Ac_ok = 0
+   Else
+      Ac_ok = 1
+   End If
 Return
 
 
@@ -986,7 +996,7 @@ Return
 'Rutine za branje in pisanje s SD kartice
 Sd_config:
    Set Led_r
-   If Sd_detect = 0 And Skip_sd = 0 Then                    'Le ob vstavljeni kartici
+   If Sd_missing = 0 And Skip_sd = 0 Then                    'Le ob vstavljeni kartici
       Disable Interrupts
       $include "Config_MMCSD_HC.bas"
       $include "CONFIG_AVR-DOS.bas"
@@ -1001,7 +1011,7 @@ Return
 
 
 Sd_write_log:
-   If Sd_detect = 0 And Skip_sd = 0 Then
+   If Sd_missing = 0 And Skip_sd = 0 Then
       Set Led_r
       Chdir "LOG"
         File_handle = Freefile()
@@ -1029,7 +1039,7 @@ Return
 
 Sd_write_history:
    History_tmr = 0
-   If Sd_detect = 0 And Skip_sd = 0 Then
+   If Sd_missing = 0 And Skip_sd = 0 Then
       Set Led_r
       Chdir "LOG"
         File_handle = Freefile()
@@ -1085,7 +1095,7 @@ Return
 Sd_start:
 
    Disable Interrupts
-   If Sd_detect = 0 And Skip_sd = 0 Then
+   If Sd_missing = 0 And Skip_sd = 0 Then
       Set Led_r
       Print #2 , "SD start"
       Waitms 500
@@ -1192,9 +1202,6 @@ Sd_start:
         Print #file_handle , "1.8577 - ph_calib_401"
         Print #file_handle , "1.5317 - ph_calib_700"
         Print #file_handle , "0.1144 - ph_calc1"
-'        Print #file_handle , ""
-'        Print #file_handle , "________FEED TIME________"
-'        Print #file_handle , "300 - feed time in s (xxx)"
 
         Chdir "\"
         Flush #file_handle
@@ -1333,7 +1340,7 @@ Sd_start:
      Waitms 500
 
      Reset Led_r
-   Elseif Sd_detect = 1 Then
+   Elseif Sd_missing = 1 Then
       Print #2 , "SD error!"
    End If
 
@@ -1379,7 +1386,7 @@ Return
 
 
 Sd_data_send:                                               'Posiljanje preko UARTa
-   If Sd_detect = 0 And Skip_sd = 0 Then
+   If Sd_missing = 0 And Skip_sd = 0 Then
       Set Led_r
         Chdir "LOG"
         File_handle = Freefile()
@@ -1398,13 +1405,14 @@ Sd_data_send:                                               'Posiljanje preko UA
         Close #file_handle
         Chdir "\"
       Reset Led_r
-   Elseif Sd_detect = 1 Then
+   Elseif Sd_missing = 1 Then
          Print #2 , "SD error!"
    End If
 Return
 
+
 Sd_data_del:                                                'Brisanje preko UARTa
-   If Sd_detect = 0 And Skip_sd = 0 Then
+   If Sd_missing = 0 And Skip_sd = 0 Then
       Set Led_r
       Chdir "LOG"
       File_handle = Freefile()
@@ -1414,17 +1422,10 @@ Sd_data_del:                                                'Brisanje preko UART
       Chdir "\"
       Print "DEL OK"
       Reset Led_r
-   Elseif Sd_detect = 1 Then
+   Elseif Sd_missing = 1 Then
       Print #2 , "SD error!"
    End If
 Return
-
-
-
-
-
-
-
 
 
 
