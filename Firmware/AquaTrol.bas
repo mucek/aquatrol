@@ -3,8 +3,8 @@ $crystal = 11059200
 $hwstack = 128
 $swstack = 64
 $framesize = 64
-$version 1 , 0 , 598
-$projecttime = 826
+$version 1 , 0 , 605
+$projecttime = 832
 
 Config Com1 = 115200 , Synchrone = 0 , Parity = None , Stopbits = 1 , Databits = 8 , Clockpol = 0       'BLE
 Config Serialin = Buffered , Size = 50 , Bytematch = 10
@@ -138,12 +138,10 @@ Dim Sc_pad(9) As Byte , 1w_tmr As Byte , Temp_sin As Single
 Dim Temp As Integer At Sc_pad(1) Overlay
 Dim Temperatura As Integer
 
-
 'Globalne nastavitve
 Dim Zakasnitev As Word
 Dim Config_bt_skip As Byte
 Dim Skip_sd As Byte
-
 
 'Filtra
 Dim Feed_time As Word
@@ -229,6 +227,8 @@ Dim Led3_pwm_on As Byte
 Dim Led3_pwm_off As Byte
    Dim E_led3_pwm_off As Eram Byte
 
+Dim Switch_leds As Byte
+
 Dim Feed_pump_select As Byte                                '0-funkcija onemogocena, 1-funkcija aktivna na R5, 2-funkcija aktivna na R5+R6
    Dim E_feed_pump_select As Eram Byte
 
@@ -294,6 +294,7 @@ Do
 
    'Nastavitve preko UARTa
    If Ph_calib = 1 Then Goto 41_calib_ph
+   If Switch_leds = 1 Then Gosub Leds_on_bt
 
    Reset Led_g                                              'UART
 Loop
@@ -897,6 +898,38 @@ Return
 Return
 
 
+Leds_on_bt:
+   If Led1_enabled = 0 Then
+      Do
+         Led1_enabled = 1 : If Pwm1a < Led1_pwm_on Then Incr Pwm1a
+         Led2_enabled = 1 : If Pwm1b < Led2_pwm_on Then Incr Pwm1b
+         Led3_enabled = 1 : If Pwm1c < Led3_pwm_on Then Incr Pwm1c
+         Waitms 50
+         Toggle Led_g
+      Loop Until Pwm1a = Led1_pwm_on
+         Pwm1a = Led1_pwm_on
+         Pwm1b = Led2_pwm_on
+         Pwm1c = Led3_pwm_on
+         Reset Led_g
+
+   Elseif Led1_enabled = 1 Then                       'Izklop
+      Do
+         Led1_enabled = 0 : If Pwm1a > Led1_pwm_off Then Decr Pwm1a
+         Led2_enabled = 0 : If Pwm1b > Led2_pwm_off Then Decr Pwm1b
+         Led3_enabled = 0 : If Pwm1c > Led3_pwm_off Then Decr Pwm1c
+         Toggle Led_g : Toggle Led_r
+         Waitms 50
+      Loop Until Pwm1a = Led1_pwm_off
+         Reset Led_g : Reset Led_r
+         Pwm1a = Led1_pwm_off
+         Pwm1b = Led2_pwm_off
+         Pwm1c = Led3_pwm_off
+   End If
+
+   Switch_leds = 0
+Return
+
+
 43_read_1wire:
    If 1w_tmr > 10 Then
       1w_tmr = 0
@@ -1439,7 +1472,8 @@ Serial0charmatch:
    If _rs232inbuf0(_rs_bufcountr0 -1) = 13 Then
       Set Led_g
 
-      If _rs232inbuf0(_rs_bufcountr0 -2) = 99 Then Ph_calib = 1       'c
+      If _rs232inbuf0(_rs_bufcountr0 -2) = 99 Then Ph_calib = 1       'c - Calibrate
+      If _rs232inbuf0(_rs_bufcountr0 -2) = 108 Then Switch_leds = 1       'l - Leds
 
    End If
 
@@ -1455,7 +1489,8 @@ Serial1charmatch:
    If _rs232inbuf1(_rs_bufcountr1 -1) = 13 Then
       Set Led_g
 
-      If _rs232inbuf1(_rs_bufcountr1 -2) = 99 Then Ph_calib = 1       'c
+      If _rs232inbuf1(_rs_bufcountr1 -2) = 99 Then Ph_calib = 1       'c - Calibrate
+      If _rs232inbuf1(_rs_bufcountr1 -2) = 108 Then Switch_leds = 1       'l - Leds
 
    End If
 

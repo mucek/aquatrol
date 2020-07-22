@@ -1,6 +1,6 @@
 Report       : AquaTrol
-Date         : 07-20-2020
-Time         : 09:16:52
+Date         : 07-22-2020
+Time         : 15:17:35
 
 Compiler     : BASCOM-AVR LIBRARY V 2.0.7.9
 Processor    : M64
@@ -8,9 +8,9 @@ SRAM         : 1000 hex
 EEPROM       : 800 hex
 ROMSIZE      : 10000 hex
 
-ROMIMAGE     : 7048 hex  -> Will fit into ROM
-ROMIMAGE     :  28744 dec
-FLASH USED   :  43  %
+ROMIMAGE     : 7270 hex  -> Will fit into ROM
+ROMIMAGE     :  29296 dec
+FLASH USED   :  44  %
 BAUD         : 9600 Baud
 XTAL         : 11059200 Hz
 BAUD error   : 0.%
@@ -21,7 +21,7 @@ S-Stacksize  : 40 hex
 S-Stackstart : 1080 hex
 Framesize    : 40 hex
 Framestart   : 1000 hex
-Space left   :  940  dec
+Space left   :  939  dec
 
 LCD DB7      : PORTB.7
 LCD DB6      : PORTB.6
@@ -255,42 +255,43 @@ LED3_PWM_ON                      Byte              03B8          952
 E_LED3_PWM_ON                    EEPROM Byte       007A          122 
 LED3_PWM_OFF                     Byte              03B9          953 
 E_LED3_PWM_OFF                   EEPROM Byte       007B          123 
-FEED_PUMP_SELECT                 Byte              03BA          954 
+SWITCH_LEDS                      Byte              03BA          954 
+FEED_PUMP_SELECT                 Byte              03BB          955 
 E_FEED_PUMP_SELECT               EEPROM Byte       007C          124 
-MMCSD_CARDTYPE                   Byte              03BB          955 
-GBDRIVEERROR                     Byte              03BC          956 
-GBDRIVESTATUSREG                 Byte              03BD          957 
-GBDRIVEDEBUG                     Byte              03BE          958 
-GLDRIVESECTORS                   Long              03BF          959 
-GBDOSERROR                       Byte              03C3          963 
-GBFILESYSTEM                     Byte              03C4          964 
-GBFILESYSTEMSTATUS               Byte              03C5          965 
-GLFATFIRSTSECTOR                 Long              03C6          966 
-GBNUMBEROFFATS                   Byte              03CA          970 
-GLSECTORSPERFAT                  Long              03CB          971 
-GLROOTFIRSTSECTOR                Long              03CF          975 
-GWROOTENTRIES                    Word              03D3          979 
-GLDATAFIRSTSECTOR                Long              03D5          981 
-GBSECTORSPERCLUSTER              Byte              03D9          985 
-GLMAXCLUSTERNUMBER               Long              03DA          986 
-GLLASTSEARCHEDCLUSTER            Long              03DE          990 
-GLFS_TEMP1                       Long              03E2          994 
-GLDIRFIRSTSECTORNUMBER           Long              03E6          998 
-GWFREEDIRENTRY                   Word              03EA          1002 
-GLFREEDIRSECTORNUMBER            Long              03EC          1004 
-GSDIR0TEMPFILENAME               String * 11       03F0          1008 
-GWDIR0ENTRY                      Word              03FC          1020 
-GLDIR0SECTORNUMBER               Long              03FE          1022 
-GSTEMPFILENAME                   String * 11       0402          1026 
-GWDIRENTRY                       Word              040E          1038 
-GLDIRSECTORNUMBER                Long              0410          1040 
-GBDIRBUFFERSTATUS                Byte              0414          1044 
-GBDIRBUFFER                      Byte(512)         0415          1045 
-GLFATSECTORNUMBER                Long              0615          1557 
-GBFATBUFFERSTATUS                Byte              0619          1561 
-GBFATBUFFER                      Byte(512)         061A          1562 
-ABFILEHANDLES                    Byte(1076)        081A          2074 
-LASTDOSMEM                       Byte              0C4E          3150 
+MMCSD_CARDTYPE                   Byte              03BC          956 
+GBDRIVEERROR                     Byte              03BD          957 
+GBDRIVESTATUSREG                 Byte              03BE          958 
+GBDRIVEDEBUG                     Byte              03BF          959 
+GLDRIVESECTORS                   Long              03C0          960 
+GBDOSERROR                       Byte              03C4          964 
+GBFILESYSTEM                     Byte              03C5          965 
+GBFILESYSTEMSTATUS               Byte              03C6          966 
+GLFATFIRSTSECTOR                 Long              03C7          967 
+GBNUMBEROFFATS                   Byte              03CB          971 
+GLSECTORSPERFAT                  Long              03CC          972 
+GLROOTFIRSTSECTOR                Long              03D0          976 
+GWROOTENTRIES                    Word              03D4          980 
+GLDATAFIRSTSECTOR                Long              03D6          982 
+GBSECTORSPERCLUSTER              Byte              03DA          986 
+GLMAXCLUSTERNUMBER               Long              03DB          987 
+GLLASTSEARCHEDCLUSTER            Long              03DF          991 
+GLFS_TEMP1                       Long              03E3          995 
+GLDIRFIRSTSECTORNUMBER           Long              03E7          999 
+GWFREEDIRENTRY                   Word              03EB          1003 
+GLFREEDIRSECTORNUMBER            Long              03ED          1005 
+GSDIR0TEMPFILENAME               String * 11       03F1          1009 
+GWDIR0ENTRY                      Word              03FD          1021 
+GLDIR0SECTORNUMBER               Long              03FF          1023 
+GSTEMPFILENAME                   String * 11       0403          1027 
+GWDIRENTRY                       Word              040F          1039 
+GLDIRSECTORNUMBER                Long              0411          1041 
+GBDIRBUFFERSTATUS                Byte              0415          1045 
+GBDIRBUFFER                      Byte(512)         0416          1046 
+GLFATSECTORNUMBER                Long              0616          1558 
+GBFATBUFFERSTATUS                Byte              061A          1562 
+GBFATBUFFER                      Byte(512)         061B          1563 
+ABFILEHANDLES                    Byte(1076)        081B          2075 
+LASTDOSMEM                       Byte              0C4F          3151 
 
 --------------------------------------------------------------------------------
 Constant                         Value
@@ -990,7 +991,7 @@ _FRAME_HIGH                      &H1041
 _XMEGA                           0
 _VERSION_MAJOR                   1
 _VERSION_MINOR                   0
-_VERSION_BUILD                   598
+_VERSION_BUILD                   605
 _RS232_BUFSIZE0                  50
 _RS232_BUFSIZE_IN0P1             51
 _CHECKCHAR0                      1
