@@ -1,6 +1,6 @@
 Report       : AquaTrol
-Date         : 07-22-2020
-Time         : 15:17:35
+Date         : 07-27-2020
+Time         : 14:23:01
 
 Compiler     : BASCOM-AVR LIBRARY V 2.0.7.9
 Processor    : M64
@@ -8,9 +8,9 @@ SRAM         : 1000 hex
 EEPROM       : 800 hex
 ROMSIZE      : 10000 hex
 
-ROMIMAGE     : 7270 hex  -> Will fit into ROM
-ROMIMAGE     :  29296 dec
-FLASH USED   :  44  %
+ROMIMAGE     : 7800 hex  -> Will fit into ROM
+ROMIMAGE     :  30720 dec
+FLASH USED   :  46  %
 BAUD         : 9600 Baud
 XTAL         : 11059200 Hz
 BAUD error   : 0.%
@@ -21,7 +21,7 @@ S-Stacksize  : 40 hex
 S-Stackstart : 1080 hex
 Framesize    : 40 hex
 Framestart   : 1000 hex
-Space left   :  939  dec
+Space left   :  929  dec
 
 LCD DB7      : PORTB.7
 LCD DB6      : PORTB.6
@@ -142,156 +142,159 @@ TIMER_10MS                       Word              01BD          445
 BT_INITIALIZED                   Byte              01BF          447 
 E_BT_INITIALIZED                 EEPROM Byte       0000          0 
 PRINT_BLUETOOTH                  Byte              01C0          448 
-BTEMP1                           Byte              01C1          449 
-SDUSED                           Dword             01C2          450 
-SDSIZE                           Dword             01C6          454 
-SDFREE                           Dword             01CA          458 
-FILE_HANDLE                      Byte              01CE          462 
-FILE_NAME                        String * 10       01CF          463 
-STRTEMP3                         String * 20       01DA          474 
-INPUT_STRING                     String * 40       01EF          495 
-DEV_ID                           String * 16       0218          536 
-B                                Byte              0229          553 
-SD_WRITE                         Bit [6]           01B3          435 
-FILE_END                         Byte              022A          554 
-RND_ID                           Word              022B          555 
-S_RND_ID                         String * 8        022D          557 
-STRING2WRITE                     String * 75       0236          566 
-STRING2WRITE_DT                  String * 100      0282          642 
-A                                Byte              02E7          743 
-HISTORY_TMR                      Word              02E8          744 
-I2C_TMR                          Byte              02EA          746 
-S_VOLTAGE                        Single            02EB          747 
-S_VOLTAGE1                       Single            02EF          751 
-VALUE                            Word              02F3          755 
-BYTE1                            Byte              02F5          757 
-BYTE2                            Byte              02F6          758 
-BYTE3                            Byte              02F7          759 
-I                                Byte              02F8          760 
-C                                Byte              02F9          761 
-ADC_0                            Word              02FA          762 
-ADC_1                            Word              02FC          764 
-ADC_2                            Word              02FE          766 
-ADC_3                            Word              0300          768 
-ADC_4                            Word              0302          770 
-IN1                              Byte              0304          772 
-IN2                              Byte              0305          773 
-AC_OK                            Byte              0306          774 
-AC_FAIL_CNTR                     Byte              0307          775 
-1W_CONV                          Bit [5]           01B3          435 
-SC_PAD                           Byte(9)           0308          776 
-1W_TMR                           Byte              0311          785 
-TEMP_SIN                         Single            0312          786 
-TEMP                             Integer           0308          776 
-TEMPERATURA                      Integer           0316          790 
-ZAKASNITEV                       Word              0318          792 
-CONFIG_BT_SKIP                   Byte              031A          794 
-SKIP_SD                          Byte              031B          795 
-FEED_TIME                        Word              031C          796 
+UART0_RX_OK                      Byte              01C1          449 
+BUFF_TMR                         Word              01C2          450 
+UART0_ARR                        Byte(21)          01C4          452 
+S_UART0                          String * 20       01C4          452 
+UART0_LEN                        Byte              01D9          473 
+IRR                              Byte              01DA          474 
+BTEMP1                           Byte              01DB          475 
+SDUSED                           Dword             01DC          476 
+SDSIZE                           Dword             01E0          480 
+SDFREE                           Dword             01E4          484 
+FILE_HANDLE                      Byte              01E8          488 
+FILE_NAME                        String * 10       01E9          489 
+STRTEMP3                         String * 20       01F4          500 
+INPUT_STRING                     String * 40       0209          521 
+FILE_END                         Byte              0232          562 
+STRING2WRITE                     String * 75       0233          563 
+STRING2WRITE_DT                  String * 100      027F          639 
+A                                Byte              02E4          740 
+HISTORY_TMR                      Word              02E5          741 
+I2C_TMR                          Byte              02E7          743 
+S_VOLTAGE                        Single            02E8          744 
+S_VOLTAGE1                       Single            02EC          748 
+VALUE                            Word              02F0          752 
+BYTE1                            Byte              02F2          754 
+BYTE2                            Byte              02F3          755 
+BYTE3                            Byte              02F4          756 
+I                                Byte              02F5          757 
+C                                Byte              02F6          758 
+ADC_0                            Word              02F7          759 
+ADC_1                            Word              02F9          761 
+ADC_2                            Word              02FB          763 
+ADC_3                            Word              02FD          765 
+ADC_4                            Word              02FF          767 
+IN1                              Byte              0301          769 
+IN2                              Byte              0302          770 
+AC_OK                            Byte              0303          771 
+AC_FAIL_CNTR                     Byte              0304          772 
+1W_CONV                          Bit [6]           01B3          435 
+SC_PAD                           Byte(9)           0305          773 
+1W_TMR                           Byte              030E          782 
+TEMP_SIN                         Single            030F          783 
+TEMP                             Integer           0305          773 
+TEMPERATURA                      Integer           0313          787 
+ZAKASNITEV                       Word              0315          789 
+CONFIG_BT_SKIP                   Byte              0317          791 
+SKIP_SD                          Byte              0318          792 
+FEED_TIME                        Word              0319          793 
 E_FEED_TIME                      EEPROM Word       0001          1 
-DISABLE_PUMPS                    Word              031E          798 
-TARGET_TEMP                      Integer           0320          800 
+DISABLE_PUMPS                    Word              031B          795 
+TARGET_TEMP                      Integer           031D          797 
 E_TARGET_TEMP                    EEPROM Integer    0003          3 
-TEMP_HYSTERESIS                  Integer           0322          802 
-TEMP_ON                          Integer           0324          804 
-TEMP_OFF                         Integer           0326          806 
-PH                               Single            0328          808 
-PH_CALIB_700                     Single            032C          812 
+TEMP_HYSTERESIS                  Integer           031F          799 
+TEMP_ON                          Integer           0321          801 
+TEMP_OFF                         Integer           0323          803 
+PH                               Single            0325          805 
+PH_CALIB_700                     Single            0329          809 
 E_PH_CALIB_700                   EEPROM Single     0005          5 
-PH_CALIB_401                     Single            0330          816 
+PH_CALIB_401                     Single            032D          813 
 E_PH_CALIB_401                   EEPROM Single     0009          9 
-PH_CALC1                         Single            0334          820 
+PH_CALC1                         Single            0331          817 
 E_PH_CALC1                       EEPROM Single     000D          13 
-A_PH                             Byte              0338          824 
-PH_CALIBRATED                    Byte              0339          825 
+A_PH                             Byte              0335          821 
+PH_CALIBRATED                    Byte              0336          822 
 E_PH_CALIBRATED                  EEPROM Byte       0011          17 
-PH_LIMIT                         Single            033A          826 
+PH_LIMIT                         Single            0337          823 
 E_PH_LIMIT                       EEPROM Single     0012          18 
-PH_ON                            Single            033E          830 
-PH_OFF                           Single            0342          834 
-PH_HYS                           Single            0346          838 
-PH_CALIB                         Byte              034A          842 
-SKIMMER_ON1                      String * 8        034B          843 
+PH_ON                            Single            033B          827 
+PH_OFF                           Single            033F          831 
+PH_HYS                           Single            0343          835 
+PH_CALIB                         Byte              0347          839 
+SKIMMER_ON1                      String * 8        0348          840 
 E_SKIMMER_ON1                    EEPROM String     0016          22 
-SKIMMER_OFF1                     String * 8        0354          852 
+SKIMMER_OFF1                     String * 8        0351          849 
 E_SKIMMER_OFF1                   EEPROM String     001F          31 
-SKIMMER_ON2                      String * 8        035D          861 
+SKIMMER_ON2                      String * 8        035A          858 
 E_SKIMMER_ON2                    EEPROM String     0028          40 
-SKIMMER_OFF2                     String * 8        0366          870 
+SKIMMER_OFF2                     String * 8        0363          867 
 E_SKIMMER_OFF2                   EEPROM String     0031          49 
-DIMMING_STEP1                    Word              036F          879 
+DIMMING_STEP1                    Word              036C          876 
 E_DIMMING_STEP1                  EEPROM Word       003A          58 
-DIMMING_STEP2                    Word              0371          881 
+DIMMING_STEP2                    Word              036E          878 
 E_DIMMING_STEP2                  EEPROM Word       003C          60 
-DIMMING_STEP3                    Word              0373          883 
+DIMMING_STEP3                    Word              0370          880 
 E_DIMMING_STEP3                  EEPROM Word       003E          62 
-LED1_ENABLED                     Byte              0375          885 
-DIMMING_TIMER1                   Word              0376          886 
-LED1_ON_TIME                     String * 8        0378          888 
+LED1_ENABLED                     Byte              0372          882 
+DIMMING_TIMER1                   Word              0373          883 
+LED1_ON_TIME                     String * 8        0375          885 
 E_LED1_ON_TIME                   EEPROM String     0040          64 
-LED1_OFF_TIME                    String * 8        0381          897 
+LED1_OFF_TIME                    String * 8        037E          894 
 E_LED1_OFF_TIME                  EEPROM String     0049          73 
-LED1_PWM_ON                      Byte              038A          906 
+LED1_PWM_ON                      Byte              0387          903 
 E_LED1_PWM_ON                    EEPROM Byte       0052          82 
-LED1_PWM_OFF                     Byte              038B          907 
+LED1_PWM_OFF                     Byte              0388          904 
 E_LED1_PWM_OFF                   EEPROM Byte       0053          83 
-LED2_ENABLED                     Byte              038C          908 
-DIMMING_TIMER2                   Word              038D          909 
-LED2_ON_TIME                     String * 8        038F          911 
+LED2_ENABLED                     Byte              0389          905 
+DIMMING_TIMER2                   Word              038A          906 
+LED2_ON_TIME                     String * 8        038C          908 
 E_LED2_ON_TIME                   EEPROM String     0054          84 
-LED2_OFF_TIME                    String * 8        0398          920 
+LED2_OFF_TIME                    String * 8        0395          917 
 E_LED2_OFF_TIME                  EEPROM String     005D          93 
-LED2_PWM_ON                      Byte              03A1          929 
+LED2_PWM_ON                      Byte              039E          926 
 E_LED2_PWM_ON                    EEPROM Byte       0066          102 
-LED2_PWM_OFF                     Byte              03A2          930 
+LED2_PWM_OFF                     Byte              039F          927 
 E_LED2_PWM_OFF                   EEPROM Byte       0067          103 
-LED3_ENABLED                     Byte              03A3          931 
-DIMMING_TIMER3                   Word              03A4          932 
-LED3_ON_TIME                     String * 8        03A6          934 
+LED3_ENABLED                     Byte              03A0          928 
+DIMMING_TIMER3                   Word              03A1          929 
+LED3_ON_TIME                     String * 8        03A3          931 
 E_LED3_ON_TIME                   EEPROM String     0068          104 
-LED3_OFF_TIME                    String * 8        03AF          943 
+LED3_OFF_TIME                    String * 8        03AC          940 
 E_LED3_OFF_TIME                  EEPROM String     0071          113 
-LED3_PWM_ON                      Byte              03B8          952 
+LED3_PWM_ON                      Byte              03B5          949 
 E_LED3_PWM_ON                    EEPROM Byte       007A          122 
-LED3_PWM_OFF                     Byte              03B9          953 
+LED3_PWM_OFF                     Byte              03B6          950 
 E_LED3_PWM_OFF                   EEPROM Byte       007B          123 
-SWITCH_LEDS                      Byte              03BA          954 
-FEED_PUMP_SELECT                 Byte              03BB          955 
+SWITCH_LEDS                      Byte              03B7          951 
+FEED_PUMP_SELECT                 Byte              03B8          952 
 E_FEED_PUMP_SELECT               EEPROM Byte       007C          124 
-MMCSD_CARDTYPE                   Byte              03BC          956 
-GBDRIVEERROR                     Byte              03BD          957 
-GBDRIVESTATUSREG                 Byte              03BE          958 
-GBDRIVEDEBUG                     Byte              03BF          959 
-GLDRIVESECTORS                   Long              03C0          960 
-GBDOSERROR                       Byte              03C4          964 
-GBFILESYSTEM                     Byte              03C5          965 
-GBFILESYSTEMSTATUS               Byte              03C6          966 
-GLFATFIRSTSECTOR                 Long              03C7          967 
-GBNUMBEROFFATS                   Byte              03CB          971 
-GLSECTORSPERFAT                  Long              03CC          972 
-GLROOTFIRSTSECTOR                Long              03D0          976 
-GWROOTENTRIES                    Word              03D4          980 
-GLDATAFIRSTSECTOR                Long              03D6          982 
-GBSECTORSPERCLUSTER              Byte              03DA          986 
-GLMAXCLUSTERNUMBER               Long              03DB          987 
-GLLASTSEARCHEDCLUSTER            Long              03DF          991 
-GLFS_TEMP1                       Long              03E3          995 
-GLDIRFIRSTSECTORNUMBER           Long              03E7          999 
-GWFREEDIRENTRY                   Word              03EB          1003 
-GLFREEDIRSECTORNUMBER            Long              03ED          1005 
-GSDIR0TEMPFILENAME               String * 11       03F1          1009 
-GWDIR0ENTRY                      Word              03FD          1021 
-GLDIR0SECTORNUMBER               Long              03FF          1023 
-GSTEMPFILENAME                   String * 11       0403          1027 
-GWDIRENTRY                       Word              040F          1039 
-GLDIRSECTORNUMBER                Long              0411          1041 
-GBDIRBUFFERSTATUS                Byte              0415          1045 
-GBDIRBUFFER                      Byte(512)         0416          1046 
-GLFATSECTORNUMBER                Long              0616          1558 
-GBFATBUFFERSTATUS                Byte              061A          1562 
-GBFATBUFFER                      Byte(512)         061B          1563 
-ABFILEHANDLES                    Byte(1076)        081B          2075 
-LASTDOSMEM                       Byte              0C4F          3151 
+S_CMD                            String * 5        03B9          953 
+S_VAL                            String * 6        03BF          959 
+MMCSD_CARDTYPE                   Byte              03C6          966 
+GBDRIVEERROR                     Byte              03C7          967 
+GBDRIVESTATUSREG                 Byte              03C8          968 
+GBDRIVEDEBUG                     Byte              03C9          969 
+GLDRIVESECTORS                   Long              03CA          970 
+GBDOSERROR                       Byte              03CE          974 
+GBFILESYSTEM                     Byte              03CF          975 
+GBFILESYSTEMSTATUS               Byte              03D0          976 
+GLFATFIRSTSECTOR                 Long              03D1          977 
+GBNUMBEROFFATS                   Byte              03D5          981 
+GLSECTORSPERFAT                  Long              03D6          982 
+GLROOTFIRSTSECTOR                Long              03DA          986 
+GWROOTENTRIES                    Word              03DE          990 
+GLDATAFIRSTSECTOR                Long              03E0          992 
+GBSECTORSPERCLUSTER              Byte              03E4          996 
+GLMAXCLUSTERNUMBER               Long              03E5          997 
+GLLASTSEARCHEDCLUSTER            Long              03E9          1001 
+GLFS_TEMP1                       Long              03ED          1005 
+GLDIRFIRSTSECTORNUMBER           Long              03F1          1009 
+GWFREEDIRENTRY                   Word              03F5          1013 
+GLFREEDIRSECTORNUMBER            Long              03F7          1015 
+GSDIR0TEMPFILENAME               String * 11       03FB          1019 
+GWDIR0ENTRY                      Word              0407          1031 
+GLDIR0SECTORNUMBER               Long              0409          1033 
+GSTEMPFILENAME                   String * 11       040D          1037 
+GWDIRENTRY                       Word              0419          1049 
+GLDIRSECTORNUMBER                Long              041B          1051 
+GBDIRBUFFERSTATUS                Byte              041F          1055 
+GBDIRBUFFER                      Byte(512)         0420          1056 
+GLFATSECTORNUMBER                Long              0620          1568 
+GBFATBUFFERSTATUS                Byte              0624          1572 
+GBFATBUFFER                      Byte(512)         0625          1573 
+ABFILEHANDLES                    Byte(1076)        0825          2085 
+LASTDOSMEM                       Byte              0C59          3161 
 
 --------------------------------------------------------------------------------
 Constant                         Value
@@ -990,8 +993,8 @@ _SWSTACK_LOW                     &H1040
 _FRAME_HIGH                      &H1041
 _XMEGA                           0
 _VERSION_MAJOR                   1
-_VERSION_MINOR                   0
-_VERSION_BUILD                   605
+_VERSION_MINOR                   1
+_VERSION_BUILD                   35
 _RS232_BUFSIZE0                  50
 _RS232_BUFSIZE_IN0P1             51
 _CHECKCHAR0                      1
@@ -1231,16 +1234,15 @@ PWM3C                            not used
 COMPARE3C                        not used
 PWM0                             not used
 I2C_DTA                          not used
-DEV_ID                           not used
-B                                not used
-SD_WRITE                         not used
-RND_ID                           not used
-S_RND_ID                         not used
 GLDRIVESECTORS                   not used
 GLDIR0SECTORNUMBER               not used
 GBFATBUFFER                      not used
 LASTDOSMEM                       not used
 
+Length of string might not be enough to hold the result. A length of 16 is desir  in line  0 
+Length of string might not be enough to hold the result. A length of 16 is desir  in line  0 
+Length of string might not be enough to hold the result. A length of 16 is desir  in line  0 
+Length of string might not be enough to hold the result. A length of 16 is desir  in line  0 
 Length of string might not be enough to hold the result. A length of 16 is desir  in line  0 
 Length of string might not be enough to hold the result. A length of 16 is desir  in line  0 
 Length of string might not be enough to hold the result. A length of 16 is desir  in line  0 

@@ -1,13 +1,10 @@
-'v.1.1
-'-Changed UART routines from bytes to full strings
-
 $regfile = "m64def.dat"
 $crystal = 11059200
 $hwstack = 128
 $swstack = 64
 $framesize = 64
-$version 1 , 1 , 35
-$projecttime = 912
+$version 1 , 0 , 607
+$projecttime = 832
 
 Config Com1 = 115200 , Synchrone = 0 , Parity = None , Stopbits = 1 , Databits = 8 , Clockpol = 0       'BLE
 Config Serialin = Buffered , Size = 50 , Bytematch = 10
@@ -88,21 +85,6 @@ Dim Bt_initialized As Byte
 Dim E_bt_initialized As Eram Byte
 Dim Print_bluetooth As Byte
 
-'UART
-Dim Uart0_rx_ok As Byte
-Dim Buff_tmr As Word
-
-Dim Uart0_arr(21) As Byte
-Dim S_uart0 As String * 20 At Uart0_arr() Overlay
-Dim Uart0_len As Byte
-Dim Irr As Byte
-
-'Dim Uart1_arr(21) As Byte
-'Dim S_uart1 As String * 20 At Uart1_arr() Overlay
-'Dim Uart1_len As Byte
-'Dim Uart1_rx_ok As Byte
-
-
 
 'SD
 Dim Btemp1 As Byte
@@ -113,7 +95,12 @@ Dim File_handle As Byte
 Dim File_name As String * 10
 Dim Strtemp3 As String * 20
 Dim Input_string As String * 40
+Dim Dev_id As String * 16
+Dim B As Byte
+Dim Sd_write As Bit
 Dim File_end As Byte
+Dim Rnd_id As Word
+Dim S_rnd_id As String * 8
 Dim String2write As String * 75                             'String za zapis v LOG, po pisanju se izbrise
 Dim String2write_dt As String * 100
 Dim A As Byte
@@ -245,9 +232,6 @@ Dim Switch_leds As Byte
 Dim Feed_pump_select As Byte                                '0-funkcija onemogocena, 1-funkcija aktivna na R5, 2-funkcija aktivna na R5+R6
    Dim E_feed_pump_select As Eram Byte
 
-Dim S_cmd As String * 5
-Dim S_val As String * 6
-
 Ph_hys = 0.1
 Temp_hysteresis = 2                                         '0,2 stopinje C gor/dol od target temp
 
@@ -273,9 +257,6 @@ Pwm1c = Led3_pwm_off
 
 Do
 '   Toggle Led_g
-
-
-   Gosub Read_bt
 
    Gosub 41_read_i2c_adc
    Gosub 41_ph_calc
@@ -322,75 +303,6 @@ Loop
 
 
 '===============================================================================================================
-
-Read_bt:
-   If Uart0_rx_ok = 1 Then
-      Uart0_rx_ok = 0
-'      Print "Received:" ; S_uart0
-
-      S_cmd = Left(s_uart0 , 4)
-      S_val = Right(s_uart0 , 6)
-
-      If S_cmd = "lamp" Then
-         Print "Changing LED status!"
-         Wait 1
-         Gosub Leds_on_bt
-
-      Elseif S_cmd = "cal7" Then
-         Ph_calib_700 = Val(s_val)
-         E_ph_calib_700 = Ph_calib_700
-         Print "Ph7 voltage set to " ; Ph_calib_700 ; " V."
-         Wait 3
-
-      Elseif S_cmd = "cals" Then
-         Ph_calc1 = Val(s_val)
-         E_ph_calc1 = Ph_calc1
-         Print "1 pH step = " ; Ph_calc1 ; " V."
-         Wait 3
-
-      Elseif S_cmd = "cala" Then
-         Gosub 41_calib_ph
-
-      Elseif S_cmd = "feed" Then
-
-      Elseif S_cmd = "help" Then
-         Print "Aquatrol " ; Version(2)
-         Print
-         Print "help - general help"
-         Print "pars - get current parameters"
-         Print
-         Print "LED CONTROL"
-         Print "ledsA-XXX - A=channel1-3, XXX=000-255"
-         Print
-         Print "PH CALIBRATION"
-         Print "cal7x.xx - x.xxx is probe voltage at pH=7 (zero)"
-         Print "calsx.xx - x.xxx is probe voltage for 1 pH step (slope)"
-         Print "cala - start automatic pH calibration"
-         Print
-         Print "DIRECT COMMANDS"
-         Print "feed - start feed cycle"
-         Print "lamp - turn LEDs on/off"
-
-         Wait 5
-      Elseif S_cmd = "pars" Then
-         Gosub Print_bt
-         Wait 5
-      End If
-
-      S_uart0 = ""
-      For Irr = 1 To 20                                     'Input Uart1_str , Noecho
-         Uart0_arr(irr) = 0
-         Clear Serialin
-      Next
-   End If
-
-   Incr Buff_tmr
-   If Buff_tmr > 50 Then
-      Buff_tmr = 0
-      Clear Serialin
-   End If
-Return
-
 
 51_set_pumps:
    If Disable_pumps = 0 And Rele_pump1 = 1 Then
@@ -588,7 +500,6 @@ Return
 
    Print #2 , Chr(028) : Waitms 100
    Print #2 , "AquaTrol startup, v." ; Version(2)
-   Print "AquaTrol startup, v." ; Version(2)
 
    'Bluetooth setup
    Bt_initialized = E_bt_initialized
@@ -746,7 +657,7 @@ Return
 
 Print_terminal:
    Print #2 , Chr(028) : Waitms 100
-   Print #2 , Date$ ; " " ; Time$ ; Version(2)
+   Print #2 , Date$ ; " " ; Time$
    Print #2 , "Fltr1_dis:" ; Rele_pump1 ; "(t=" ; Disable_pumps ; ")"
    Print #2 , "Fltr2_dis:" ; Rele_pump2 ; "(t=" ; Disable_pumps ; ")"
    Print #2 , "Heater:" ; Rele_heater ; "(" ; Temp_on ; "/" ; Temp_off ; ")"
@@ -772,7 +683,7 @@ Return
 
 Print_bt:
    Print ""
-   Print Date$ ; " " ; Time$ ; ", ver." ; Version(2)
+   Print Date$ ; " " ; Time$
    Print "Fltr1_dis:" ; Rele_pump1 ; "(t=" ; Disable_pumps ; ")"
    Print "Fltr2_dis:" ; Rele_pump2 ; "(t=" ; Disable_pumps ; ")"
    Print "Heater:" ; Rele_heater ; "(" ; Temp_on ; "/" ; Temp_off ; ")"
@@ -788,9 +699,6 @@ Print_bt:
    Print "AC OK:" ; Ac_ok ; : If Ac_ok = 0 Then Print "!!!" : If Ac_ok = 1 Then Print ""
    Print "IN1 feed:" ; In1 ; "(" ; Feed_time ; "s)"
    Print "IN2 light:" ; In2 ; "(step " ; Dimming_step1 ; ")"
-   Print "U@ph7= " ; Ph_calib_700 ; " V"
-   Print "Ph step= " ; Ph_calc1 ; " V"
-
 Return
 
 
@@ -927,8 +835,6 @@ Goto 02_main
    Ph = Ph / Ph_calc1
    Ph = -ph
    Ph = Ph + 7.00
-
-   If Ph < 4 Or Ph > 12 Then Ph = 99
 Return
 
 
@@ -1560,18 +1466,15 @@ Return
 
 
 
-Serial0charmatch:                                           'BLE
+Serial0charmatch:
    Pushall
-   Set Led_g
 
-   If _rs232inbuf0(_rs_bufcountr0 -1) = 13 And _rs_bufcountr0 > 2 Then
-      Uart0_len = _rs_bufcountr0 - 2
-      For Irr = 1 To Uart0_len                              'Input Uart1_str , Noecho
-         Uart0_arr(irr) = _rs232inbuf0(irr)
-      Next
-      Uart0_rx_ok = 1
-      Buff_tmr = 0
-      Clear Serialin
+   If _rs232inbuf0(_rs_bufcountr0 -1) = 13 Then
+      Set Led_g
+
+      If _rs232inbuf0(_rs_bufcountr0 -2) = 99 Then Ph_calib = 1       'c - Calibrate
+      If _rs232inbuf0(_rs_bufcountr0 -2) = 108 Then Switch_leds = 1       'l - Leds
+
    End If
 
    Popall
@@ -1579,26 +1482,17 @@ Serial0charmatch:                                           'BLE
 Return
 
 
-Serial1charmatch:                                           'Nextion
+Serial1charmatch:
    Disable Interrupts
    Pushall
 
-'   If _rs232inbuf1(_rs_bufcountr1 -1) = 13 And _rs_bufcountr1 > 2 Then
-'      Uart1_len = _rs_bufcountr1 - 2
-'      For Irr = 1 To Uart1_len                              'Input Uart1_str , Noecho
-'         Uart1_arr(irr) = _rs232inbuf1(irr)
-'      Next
-'      Uart1_rx_ok = 1
-'      Buff_tmr = 0
-'   End If
+   If _rs232inbuf1(_rs_bufcountr1 -1) = 13 Then
+      Set Led_g
 
-'   If _rs232inbuf1(_rs_bufcountr1 -1) = 13 Then
-'      Set Led_g
-'
-'      If _rs232inbuf1(_rs_bufcountr1 -2) = 99 Then Ph_calib = 1       'c - Calibrate
-'      If _rs232inbuf1(_rs_bufcountr1 -2) = 108 Then Switch_leds = 1       'l - Leds
-'
-'   End If
+      If _rs232inbuf1(_rs_bufcountr1 -2) = 99 Then Ph_calib = 1       'c - Calibrate
+      If _rs232inbuf1(_rs_bufcountr1 -2) = 108 Then Switch_leds = 1       'l - Leds
+
+   End If
 
    Clear Serialin1
    Popall
