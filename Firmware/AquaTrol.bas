@@ -6,8 +6,8 @@ $crystal = 11059200
 $hwstack = 128
 $swstack = 64
 $framesize = 64
-$version 1 , 1 , 35
-$projecttime = 912
+$version 1 , 1 , 37
+$projecttime = 916
 
 Config Com1 = 115200 , Synchrone = 0 , Parity = None , Stopbits = 1 , Databits = 8 , Clockpol = 0       'BLE
 Config Serialin = Buffered , Size = 50 , Bytematch = 10
@@ -245,8 +245,11 @@ Dim Switch_leds As Byte
 Dim Feed_pump_select As Byte                                '0-funkcija onemogocena, 1-funkcija aktivna na R5, 2-funkcija aktivna na R5+R6
    Dim E_feed_pump_select As Eram Byte
 
-Dim S_cmd As String * 5
-Dim S_val As String * 6
+Dim S_cmd As String * 8
+Dim S_val As String * 8
+
+Dim Sd_eeprom As Byte                                       '1-use settings from eeprom, 0-use parameters from SD
+Dim E_sd_eeprom As Eram Byte
 
 Ph_hys = 0.1
 Temp_hysteresis = 2                                         '0,2 stopinje C gor/dol od target temp
@@ -655,8 +658,14 @@ Return
       Gosub Sd_start
    End If
 
-   'Vzamem vrednosti iz EEPROMA, ce ni kartice ali je onemogocena
-   If Skip_sd = 1 Or Sd_missing = 1 Then
+   Sd_eeprom = E_sd_eeprom
+      If Sd_eeprom = 255 Then
+         Sd_eeprom = 0
+         E_sd_eeprom = Sd_eeprom
+      End If
+
+   'Vzamem vrednosti iz EEPROMA, ce ni kartice ali je onemogocena ali je forcan EEPROM
+   If Skip_sd = 1 Or Sd_missing = 1 Or Sd_eeprom = 1 Then
       'Read EEPROM
       Target_temp = E_target_temp
          If Target_temp > 400 Or Target_temp < 100 Then
